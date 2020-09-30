@@ -33,10 +33,13 @@ if (NOT DEVICE)
     set(DEVICE STM32G070xx)
 endif ()
 
+set(CPU_TYPE "m0plus")
+
 # Set build
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE DEBUG)
 endif ()
+
 
 ##### Modules #####
 
@@ -54,90 +57,103 @@ set(LINKER_SCRIPT "../BSP/STM32G070RBTx_FLASH.ld")
 # it after libraries/subdirectories have been added
 set(CMAKE_EXE_LINKER_FLAGS "${COMMON_DEFINITIONS} -Xlinker -T${LINKER_SCRIPT} -Wl,-Map=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.map -Wl,--gc-sections -Wl,-v")
 
-##### Files #####
+##### Header & Source Files #####
 
-# Add project headers
+#TencentOS-Tiny kernel
 include_directories(${BASE_LOCATION}/kernel/core/include)
 include_directories(${BASE_LOCATION}/kernel/pm/include)
 include_directories(${BASE_LOCATION}/kernel/hal/include)
+
+aux_source_directory(${BASE_LOCATION}/kernel/core/ SOURCE_FILES)
+aux_source_directory(${BASE_LOCATION}/kernel/pm/ SOURCE_FILES)
+
+
+#Operating system abstraction layer header
+include_directories(${BASE_LOCATION}/osal/cmsis_os)
+#aux_source_directory(${BASE_LOCATION}/osal/cmsis_os/ SOURCE_FILES)
+set(OSAL_SOURCE  ${BASE_LOCATION}/osal/cmsis_os/cmsis_os.c)
+
+#CPU Architecture header
 include_directories(${BASE_LOCATION}/arch/arm/arm-v7m/common/include)
 include_directories(${BASE_LOCATION}/arch/arm/arm-v7m/cortex-m0+/gcc)
-include_directories(${BASE_LOCATION}/osal/cmsis_os)
+
+aux_source_directory(${BASE_LOCATION}/arch/arm/arm-v7m/cortex-m0+/gcc/ SOURCE_FILES)
+aux_source_directory(${BASE_LOCATION}/arch/arm/arm-v7m/common/ SOURCE_FILES)
 
 
+#Chip Specified header
 include_directories(${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Inc)
 include_directories(${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Inc/Legacy)
 include_directories(${BASE_LOCATION}/platform/vendor_bsp/st/CMSIS/Device/ST/STM32G0xx/Include)
 include_directories(${BASE_LOCATION}/platform/vendor_bsp/st/CMSIS/Include)
 
+#Specified HAL_Driver Source
+set(HAL_SOURCE  ${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_cortex.c
+		${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim.c
+		${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim_ex.c
+		${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart.c
+		${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart_ex.c
+		${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc.c
+		${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc_ex.c
+		${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rtc.c
+		${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rtc_ex.c
+		${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_flash.c
+		${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_flash_ex.c
+		${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_gpio.c
+		${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_dma.c
+		${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_dma_ex.c
+		${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr.c
+		${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c
+		${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal.c
+		${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c.c
+		${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c_ex.c
+		${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_spi.c
+		${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_spi_ex.c
+		${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc.c)
 
-include_directories(./inc)
-include_directories(./BSP/Inc)
-include_directories(./TOS_CONFIG)
-
-
+#TencentOS-Tiny Specified Device Driver header
 include_directories(${BASE_LOCATION}/net/at/include)
 include_directories(${BASE_LOCATION}/devices/esp8266_tencent_firmware)
 include_directories(${BASE_LOCATION}/net/tencent_firmware_module_wrapper)
 
+aux_source_directory(${BASE_LOCATION}/net/at/src SOURCE_FILES)
+aux_source_directory(${BASE_LOCATION}/devices/esp8266_tencent_firmware SOURCE_FILES)
+aux_source_directory(${BASE_LOCATION}/net/tencent_firmware_module_wrapper SOURCE_FILES)
 
+aux_source_directory(${BASE_LOCATION}/platform/hal/st/stm32g0xx/src/ SOURCE_FILES)
+
+#BSP Specified Driver header
+include_directories(./BSP/Inc)
 include_directories(./BSP/Hardware/CH20)
 include_directories(./BSP/Hardware/OLED)
 include_directories(./BSP/Hardware/PM2D5)
 
+aux_source_directory(./BSP/Src SOURCE_FILES)
+aux_source_directory(./BSP/Hardware/CH20 SOURCE_FILES)
+aux_source_directory(./BSP/Hardware/OLED SOURCE_FILES)
+aux_source_directory(./BSP/Hardware/PM2D5 SOURCE_FILES)
+
+#Project Driver header
+include_directories(./inc)
+include_directories(./TOS_CONFIG)
+
+#aux_source_directory(./ SOURCE_FILES)
+aux_source_directory(./KEIL/mqtt_iot_explorer_tc_ch20_oled/demo/ SOURCE_FILES)
 
 
-#AUX_SOURCE_DIRECTORY(${BASE_LOCATION}/platform/vendor_bsp/st/STM32Fg0xx_HAL_Driver/Src/ SOURCE_FILES)
-
-AUX_SOURCE_DIRECTORY(${BASE_LOCATION}/platform/hal/st/stm32g0xx/src/ SOURCE_FILES)
-AUX_SOURCE_DIRECTORY(${BASE_LOCATION}/kernel/core/ SOURCE_FILES)
-AUX_SOURCE_DIRECTORY(${BASE_LOCATION}/kernel/pm/ SOURCE_FILES)
-AUX_SOURCE_DIRECTORY(${BASE_LOCATION}/arch/arm/arm-v7m/cortex-m0+/gcc/ SOURCE_FILES)
-AUX_SOURCE_DIRECTORY(${BASE_LOCATION}/arch/arm/arm-v7m/common/ SOURCE_FILES)
-#AUX_SOURCE_DIRECTORY(${BASE_LOCATION}/osal/cmsis_os/ SOURCE_FILES)
-
-AUX_SOURCE_DIRECTORY(./ SOURCE_FILES)
-AUX_SOURCE_DIRECTORY(./BSP/Src SOURCE_FILES)
-
-AUX_SOURCE_DIRECTORY(${BASE_LOCATION}/net/at/src SOURCE_FILES)
-AUX_SOURCE_DIRECTORY(./KEIL/mqtt_iot_explorer_tc_ch20_oled/demo/ SOURCE_FILES)
-AUX_SOURCE_DIRECTORY(${BASE_LOCATION}/devices/esp8266_tencent_firmware SOURCE_FILES)
-AUX_SOURCE_DIRECTORY(${BASE_LOCATION}/net/tencent_firmware_module_wrapper SOURCE_FILES)
+set(AS_SOURCE ${BASE_LOCATION}/arch/arm/arm-v7m/cortex-m0+/gcc/port_s.S
+		./BSP/startup_stm32g070xx.s)
 
 
-AUX_SOURCE_DIRECTORY(./BSP/Hardware/CH20 SOURCE_FILES)
-AUX_SOURCE_DIRECTORY(./BSP/Hardware/OLED SOURCE_FILES)
-AUX_SOURCE_DIRECTORY(./BSP/Hardware/PM2D5 SOURCE_FILES)
 
+#printf float support
 link_libraries("-u _printf_float")
 
 # Generate executable and link
-add_executable(${PROJECT_NAME} 
-	./BSP/startup_stm32g070xx.s
-	${BASE_LOCATION}/arch/arm/arm-v7m/cortex-m0+/gcc/port_s.S
-	${BASE_LOCATION}/osal/cmsis_os/cmsis_os.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_cortex.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim_ex.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart_ex.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc_ex.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rtc.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rtc_ex.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_flash.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_flash_ex.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_gpio.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_dma.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_dma_ex.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c_ex.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_spi.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_spi_ex.c
-	${BASE_LOCATION}/platform/vendor_bsp/st/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc.c
+add_executable(${PROJECT_NAME}
+	${AS_SOURCE}
+	${OSAL_SOURCE}
+	${HAL_SOURCE}
 	${SOURCE_FILES})
 
 stm32_configure_linker_addresses(${PROJECT_NAME})
@@ -145,14 +161,9 @@ stm32_configure_linker_addresses(${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME} ${LIBS} c nosys)
 
 # Link optional libraries if available
-if (${HAS_HARDWARE})
-    target_link_libraries(${PROJECT_NAME} hardware)
-endif ()
-
-if (${HAS_PROTOCOL})
-    target_link_libraries(${PROJECT_NAME} protocol)
-endif ()
-
+#if (${HAS_HARDWARE})
+#    target_link_libraries(${PROJECT_NAME} hardware)
+#endif ()
 
 
 ##### Post build #####

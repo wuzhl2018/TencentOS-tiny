@@ -37,8 +37,6 @@ message("Device: ${DEVICE}")
 string(TOUPPER ${DEVICE} DEVICE_U)
 message("Processor: ${DEVICE_U}")
 
-set(CPU_TYPE "m0plus")
-
 
 # Set compiler flags
 # Common arguments
@@ -60,7 +58,6 @@ set(CMAKE_CXX_FLAGS "${COMMON_DEFINITIONS} ${CPU_FIX} --specs=nano.specs ${DEPFL
 set(CMAKE_ASM_FLAGS "${COMMON_DEFINITIONS} -x assembler-with-cpp -DLOOP_ADDR=0x8000")
 
 # Set default inclusions
-set(LIBS ${LIBS} -lgcc -lc -lnosys -lgcc -lc -lnosys)
 
 # Debug Flags
 set(COMMON_DEBUG_FLAGS "-O0 -g -gdwarf-2")
