@@ -23,5 +23,5 @@ Powered by <a href="https://cloud.tencent.com/product/tos-tiny">TencentOS</a>
 # 安装教程
 
 - [linux (Ubuntu)](./docs/setup.linux.ubuntu.md)
-- mac (TODO)
+- [mac](./docs/setup.mac.md)
 - windows (TODO)
