@@ -36,3 +36,5 @@ board/**/Debug/*
 board/**/settings/*
 .ccls-cache
 .ccls
+user_config.h
+build

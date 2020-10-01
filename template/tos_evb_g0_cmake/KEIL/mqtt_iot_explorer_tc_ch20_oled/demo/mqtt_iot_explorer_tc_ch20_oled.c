@@ -3,11 +3,7 @@
 #include "tencent_firmware_module_wrapper.h"
 #include "ch20_parser.h"
 #include "oled.h"
-
-
-#define PRODUCT_ID              "BDDSF87WEA"
-#define DEVICE_NAME             "dev001"
-#define DEVICE_KEY              "2/sOZRAJ6B+vMNNXS41w5g=="
+#include "TOS_CONFIG/user_config.h"
 
 #define REPORT_DATA_TEMPLATE    "{\\\"method\\\":\\\"report\\\"\\,\\\"clientToken\\\":\\\"00000001\\\"\\,\\\"params\\\":{\\\"ch20_ppm_value\\\":%.3f}}"
 
@@ -59,7 +55,7 @@ void mqtt_demo_task(void)
         printf("esp8266 tencent firmware sal init fail, ret is %d\r\n", ret);
     }
 
-    esp8266_tencent_firmware_join_ap("Mculover666", "mculover666");
+    esp8266_tencent_firmware_join_ap(WIFI_NAME, WIFI_PASSWORD);
 
     strncpy(dev_info.product_id, product_id, PRODUCT_ID_MAX_SIZE);
     strncpy(dev_info.device_name, device_name, DEVICE_NAME_MAX_SIZE);

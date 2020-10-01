@@ -57,7 +57,7 @@ endif ()
 include(./toolchain/stm32-base.cmake)
 
 
-set(LINKER_SCRIPT "../BSP/STM32G070RBTx_FLASH.ld") 
+set(LINKER_SCRIPT "../BSP/STM32G070RBTx_FLASH.ld")
 
 
 # This is normally set in stm32-base.cmake, but libraries may modify it so set
@@ -65,6 +65,9 @@ set(LINKER_SCRIPT "../BSP/STM32G070RBTx_FLASH.ld")
 set(CMAKE_EXE_LINKER_FLAGS "${COMMON_DEFINITIONS} -Xlinker -T${LINKER_SCRIPT} -Wl,-Map=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.map -Wl,--gc-sections -Wl,-v")
 
 ##### Header & Source Files #####
+
+# tos_evb_g0 headers root, directly including header files is not a good practice
+include_directories(${PROJECT_SOURCE_DIR})
 
 #TencentOS-Tiny kernel
 include_directories(${BASE_LOCATION}/kernel/core/include)
