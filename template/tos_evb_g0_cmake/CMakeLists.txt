@@ -8,11 +8,18 @@
 # Set minimum CMake version
 cmake_minimum_required(VERSION 2.8.4)
 
+if (NOT DEFINED ENV{TOS_SRC_ROOT})
+    message(FATAL_ERROR "You must set TOS_SRC_ROOT environment variable!")
+endif()
+
 # Optional verbose mode, uncomment or pass in -DCMAKE_VERBOSE_MAKEFILE=ON
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-set(BASE_LOCATION ../tencentos-tiny)
-message ( STATUS "BASE_LOCATION = ${BASE_LOCATION}.")
+set(TOS_SRC_ROOT $ENV{TOS_SRC_ROOT})
+message(STATUS "Tencent OS source root: ${TOS_SRC_ROOT}.")
+
+set(BASE_LOCATION ${TOS_SRC_ROOT})
+message(STATUS "TencentOS Tiny location(BASE_LOCATION) = ${BASE_LOCATION}")
 
 set(BOARD TencentOS_Tiny_EVB_G0)
 
